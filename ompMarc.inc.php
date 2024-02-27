@@ -205,7 +205,7 @@ class ompMarc extends ImportExportPlugin2
                         * */
 
     $xmlContent .= '=005  20231002015300.0' . PHP_EOL;
-    $xmlContent .= '=008  220623s2022\\\\\\bl\\\\\\\\\\\\\\\\\\\\\\\\\\000\0\por\d' . PHP_EOL;
+    $xmlContent .= '=008  220623s2022\\\\\\\\bl\\\\\\\\\\\\\\\\\\\\\\\\000\0\por\d' . PHP_EOL;
     // ISBN
     $cleanIsbn = preg_replace('/[^0-9]/', '', $isbn);
     $xmlContent .= '=020  \\\$a' . htmlspecialchars($cleanIsbn) . PHP_EOL;
@@ -225,7 +225,9 @@ class ompMarc extends ImportExportPlugin2
     // Título
     $xmlContent .= '=245  12$a' . htmlspecialchars($submissionTitle) . ' $h[recurso eletrônico]' . PHP_EOL;
 
-    // Portal em inglês e ano
+    // local e ano
+   $copyright = $submission->getLocalizedcopyrightHolder();
+            
     $xmlContent .= '=260  \\\$aLOCAL$b' . htmlspecialchars($copyright) . '$c'.htmlspecialchars($copyrightyear) . '.' . PHP_EOL;
 
   
@@ -248,7 +250,7 @@ foreach ($additionalAuthors as $additionalAuthor) {
 
     
 //link doi
-$xmlContent .= '=856  4\$zClicar sobre o botão para acesso ao texto completo$u' . htmlspecialchars($publicationUrl) . PHP_EOL;
+$xmlContent .= '=856  4\$zClicar sobre o botão para acesso ao texto completo$uhttps://doi.org/' . htmlspecialchars($doi) . PHP_EOL;
    
 
     // Link do livro
