@@ -146,9 +146,11 @@ class ompMarc extends ImportExportPlugin2
 
         foreach ($authors as $author) {
             $authorInfo = [
-        'givenName' => $author->getLocalizedGivenName(),
-        'surname' => $author->getLocalizedFamilyName(),
-        //'afiliation' => $author->getLocalizedAffiliation(),
+                'givenName' => $author->getLocalizedGivenName(),
+                'surname' => $author->getLocalizedFamilyName(),
+                'orcid' => $author->getOrcid(),
+                'afiliation' => $author->getLocalizedAffiliation(),
+                'locale' => $author->getCountryLocalized(),
         
     ];
             $authorsInfo[] = $authorInfo;
@@ -220,13 +222,36 @@ class ompMarc extends ImportExportPlugin2
 
     // Primeira autora
     $firstAuthor = reset($authorsInfo);
-    $xmlContent .= '=100  1\$a' . htmlspecialchars($firstAuthor['surname']) . ', ' . htmlspecialchars($firstAuthor['givenName']) . PHP_EOL;
+    
+    //primeiro autor - Sobrenome, Nome - Orcid - Afiliação - País
+$firstAuthor = reset($authorsInfo);
+
+if (!empty($firstAuthor['orcid']) && !empty($firstAuthor['afiliation'])) {
+    $xmlContent .= '=100  1\$a' . htmlspecialchars($firstAuthor['surname']) . ', ' . htmlspecialchars($firstAuthor['givenName']) . 
+                    '$0' . $firstAuthor['orcid'] . 
+                    '$5(*)$7INT$8' . htmlspecialchars($firstAuthor['afiliation']) . ' $9' . htmlspecialchars($firstAuthor['locale']) . PHP_EOL;
+} elseif (!empty($firstAuthor['orcid'])) {
+    // Adiciona apenas o ORCID se presente
+    $xmlContent .= '=100  1\$a' . htmlspecialchars($firstAuthor['surname']) . ', ' . htmlspecialchars($firstAuthor['givenName']) . 
+                    '$0' . $firstAuthor['orcid'] . 
+                    '$5(*)$7INT$9' . htmlspecialchars($firstAuthor['locale']). PHP_EOL;
+} elseif (!empty($firstAuthor['afiliation'])) {
+    // Adiciona apenas a afiliação se presente
+    $xmlContent .= '=100  1\$a' . htmlspecialchars($firstAuthor['surname']) . ', ' . htmlspecialchars($firstAuthor['givenName']) . 
+                    '$7INT$8' . htmlspecialchars($firstAuthor['afiliation']) . ' $9' . htmlspecialchars($firstAuthor['locale']). PHP_EOL;
+} else {
+    // Adiciona sem ORCID e afiliação se nenhum estiver presente
+    $xmlContent .= '=100  1\$a' . htmlspecialchars($firstAuthor['surname']) . ', ' . htmlspecialchars($firstAuthor['givenName']) . 
+                    '$5(*)$9' . htmlspecialchars($firstAuthor['locale']). PHP_EOL;
+}
+
 
     // Título
-    $xmlContent .= '=245  12$a' . htmlspecialchars($submissionTitle) . ' $h[recurso eletrônico]' . PHP_EOL;
+    $xmlContent .= '=245  12$a' . htmlspecialchars($submissionTitle) . '$h[recurso eletrônico]' . PHP_EOL;
 
     // local e ano
    $copyright = $submission->getLocalizedcopyrightHolder();
+   $copyrightyear = $submission->getCopyrightYear();
             
     $xmlContent .= '=260  \\\$aLOCAL$b' . htmlspecialchars($copyright) . '$c'.htmlspecialchars($copyrightyear) . '.' . PHP_EOL;
 
@@ -250,11 +275,11 @@ foreach ($additionalAuthors as $additionalAuthor) {
 
     
 //link doi
-$xmlContent .= '=856  4\$zClicar sobre o botão para acesso ao texto completo$uhttps://doi.org/' . htmlspecialchars($doi) . PHP_EOL;
+$xmlContent .= '=856  4\$zClicar sobre o botão para acesso ao texto completo$uhttps://doi.org/' . htmlspecialchars($doi) . '$3DOI'.PHP_EOL;
    
 
     // Link do livro
-    $xmlContent .= '=856  41$zClicar sobre o botão para acesso ao texto completo$u' . htmlspecialchars($publicationUrl)  . PHP_EOL;
+    $xmlContent .= '=856  41$zClicar sobre o botão para acesso ao texto completo$u' . htmlspecialchars($publicationUrl)  . '$3E-Livro'.PHP_EOL;
 
     $xmlContent .= '=945  \\\$aP$bMONOGRAFIA/LIVRO-ED/ORG$c29$j2022$lNACIONAL' . PHP_EOL;
     
